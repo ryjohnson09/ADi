@@ -32,6 +32,9 @@ PURIFIED.PROTEIN_to_tidy <- function(PP_raw_data){
                    ifelse(grepl(x = Patients, pattern = "v4$"), 4, # visit 4
                    ifelse(grepl(x = Patients, pattern = "v5$"), 5, NA)))) %>% # visit 5
     
+    # Add Visit type (acute vs convalescent)
+    mutate(visit_type = ifelse(visit == 1, "acute", "convalescent")) %>%
+    
     # Strip ending off of patient names
     mutate(Patients = gsub("\\.v\\d$", "", Patients))
   
@@ -43,7 +46,7 @@ PURIFIED.PROTEIN_to_tidy <- function(PP_raw_data){
   clin_data <- read_csv("data/processed/TrEAT_Clinical_Metadata_tidy.csv")
   
   PP <- PP %>%
-    left_join(., clin_data, by = c("Patients" = "STUDY_ID"))
+    right_join(., clin_data, by = c("Patients" = "STUDY_ID"))
   
   # Write tidy normalized PP data to processed directory --------------------
   # Create new name for PP normalized tidy data
