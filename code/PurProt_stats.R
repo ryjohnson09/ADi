@@ -27,13 +27,16 @@ PurProt_stats <- function(dataset, # ADi dataset in tidy format
     ADi_dataset <- dataset
   }
   
+  # Rename Description to ID_Description
+  colnames(ADi_dataset)[names(ADi_dataset) == "Description"] <- "ID_Description"
+  
   # Rename grouping variables
   var1 <- paste0(toString(group_column), ".", group_variables[1])
   var2 <- paste0(toString(group_column), ".", group_variables[2])
   
   # Select only columns of interest
   ADi_dataset1 <- ADi_dataset %>%
-    select(Description, Patients, norm_value, !!group_column) %>%
+    select(ID_Description, Patients, norm_value, !!group_column) %>%
     
     # filter for only groups of interest
     filter(!!group_column %in% group_variables) %>%
@@ -45,14 +48,14 @@ PurProt_stats <- function(dataset, # ADi dataset in tidy format
   
   # Group by group_column
   ADi_stat <- ADi_dataset1 %>%
-    group_by(!!group_column, Description) %>%
+    group_by(!!group_column, ID_Description) %>%
     summarise(values = list(norm_value)) %>%
     spread(!!group_column, values)
   
   
   # Compute Statistics
   ADi_stat1 <- ADi_stat %>%
-    group_by(Description) %>%
+    group_by(ID_Description) %>%
     
     # Counts
     mutate(count.1 = length(unlist(!!as.name(var1)))) %>%
