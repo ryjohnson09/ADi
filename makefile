@@ -90,3 +90,45 @@ data/processed/IgA_PurifiedProtein_RawData_tidy.csv : data/raw/Dataset_IgA_PURIF
                                                       data/processed/TrEAT_Clinical_Metadata_tidy.csv\
                                                       code/PURIFIED.PROTEIN_to_tidy.R
 	R -e "source('code/PURIFIED.PROTEIN_to_tidy.R', echo=T); PURIFIED.PROTEIN_to_tidy('data/raw/Dataset_IgA_PURIFIED.PROTEIN/Data/IgA_PurifiedProtein_RawData.csv')"
+
+
+
+
+
+
+
+####################
+### Linear Plots ###
+####################
+
+# Create EAEC_linear_plot_PanEC_IgG_v15.png
+# Depends on:	data/processed/PanEC_IgG_IVTT_RawData_tidy.csv
+#		code/EAEC_linear_plot_PanEC_IgG_v15.R
+# Produces:	results/figures/EAEC_linear_PanEC_IgG_v15.png
+results/figures/EAEC_linear_PanEC_IgG_v15.png : data/processed/PanEC_IgG_IVTT_RawData_tidy.csv\
+						code/EAEC_linear_plot_PanEC_IgG_v15.R
+	R -e "source('code/EAEC_linear_plot_PanEC_IgG_v15.R', echo=T)"
+
+# Create EAEC_linear_plot_PanEC_IgA_v15.png
+# Depends on:   data/processed/PanEC_IgG_IVTT_RawData_tidy.csv
+#               code/EAEC_linear_plot_PanEC_IgA_v15.R
+# Produces:     results/figures/EAEC_linear_PanEC_IgA_v15.png
+results/figures/EAEC_linear_PanEC_IgA_v15.png : data/processed/PanEC_IgA_IVTT_RawData_tidy.csv\
+                                                code/EAEC_linear_plot_PanEC_IgA_v15.R
+	R -e "source('code/EAEC_linear_plot_PanEC_IgA_v15.R', echo=T)"
+
+# Create EAEC_linear_plot_PanEC_IgG_v15_culture.png
+# Depends on:   data/processed/PanEC_IgG_IVTT_RawData_tidy.csv
+#               code/EAEC_linear_plot_PanEC_IgG_v15_culture.R
+# Produces:     results/figures/EAEC_linear_PanEC_IgG_v15_culture.png
+results/figures/EAEC_linear_PanEC_IgG_v15_culture.png : data/processed/PanEC_IgG_IVTT_RawData_tidy.csv\
+                                                	code/EAEC_linear_plot_PanEC_IgG_v15_culture.R
+	R -e "source('code/EAEC_linear_plot_PanEC_IgG_v15_culture.R', echo=T)"
+
+# Create EAEC_linear_plot_PanEC_IgA_v15_culture.png
+# Depends on:   data/processed/PanEC_IgA_IVTT_RawData_tidy.csv
+#               code/EAEC_linear_plot_PanEC_IgA_v15_culture.R
+# Produces:     results/figures/EAEC_linear_PanEC_IgA_v15_culture.png
+results/figures/EAEC_linear_PanEC_IgA_v15_culture.png : data/processed/PanEC_IgA_IVTT_RawData_tidy.csv\
+                                                        code/EAEC_linear_plot_PanEC_IgA_v15_culture.R
+	R -e "source('code/EAEC_linear_plot_PanEC_IgA_v15_culture.R', echo=T)"
