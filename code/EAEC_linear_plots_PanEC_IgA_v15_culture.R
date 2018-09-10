@@ -1,9 +1,10 @@
 #####################################################
-# Name: EAEC_linear_plot_PanEC_IgG_v15.R
+# Name: EAEC_linear_plot_PanEC_IgA_v15_culture.R
 # Author: Ryan Johnson
 # Date Created: 9 September 2018
 # Purpose: Visulize the normalized spot signals from
-#  acute to convalescent using the PanEC_IgG data
+#  acute to convalescent using the PanEC_IgA data. 
+#  EAEC presence determined by culture only.
 #####################################################
 
 ## Libraries -----------------------------------------------------
@@ -13,16 +14,16 @@ library(plotly)
 
 ## Read in Data --------------------------------------------------
 
-PanEC_IgG <- read_csv("data/processed/PanEC_IgG_IVTT_RawData_tidy.csv")
+PanEC_IgA <- read_csv("data/processed/PanEC_IgA_IVTT_RawData_tidy.csv")
 
 
 ## Reformat Data ------------------------------------------------------
 
-PanEC_IgG_spread <- PanEC_IgG %>%
+PanEC_IgA_spread <- PanEC_IgA %>%
   
   # Select for ONLY EAEC infected patients
-  filter(EAEC_both == "yes") %>%
-
+  filter(EAEC_culture == "yes") %>%
+  
   # Extract columns of interest
   select(ID, Description, Patients, visit, norm_value) %>%
   
@@ -33,7 +34,7 @@ PanEC_IgG_spread <- PanEC_IgG %>%
   spread(visit, norm_value)
 
 ## Split Data ----------------------------------------------------------
-one_v_four <- PanEC_IgG_spread %>%
+one_v_four <- PanEC_IgA_spread %>%
   select(-`5`) %>%
   filter(!is.na(`4`)) %>%
   mutate(mean_diff = abs(`1` - `4`)) %>%
@@ -41,7 +42,7 @@ one_v_four <- PanEC_IgG_spread %>%
   mutate(mean_diff = abs(mean(`1`) - mean(`4`))) %>%
   arrange(desc(mean_diff))
 
-one_v_five <- PanEC_IgG_spread %>%
+one_v_five <- PanEC_IgA_spread %>%
   select(-`4`) %>%
   filter(!is.na(`5`)) %>%
   group_by(ID_Description) %>%
@@ -56,17 +57,17 @@ pick <- function(condition){
   function(d) d %>% filter_(condition)
 }
 
-PanEC_IgG_plot <- ggplot(data = one_v_five, aes(x = `1`, y = `5`)) +
+PanEC_IgA_plot <- ggplot(data = one_v_five, aes(x = `1`, y = `5`)) +
   #geom_smooth(method = "lm") +
   geom_point(alpha = 0.6, size = 2) +
   geom_point(data = pick(~ID_Description %in% top_num_mean_diff), 
              aes(color = factor(ID_Description, levels = top_num_mean_diff))) +
   facet_wrap(~Patients) +
-  labs(title = "PanEC IgG - EAEC Infected Patients: Visit 1 vs Visit 5",
+  labs(title = "PanEC IgA - EAEC Infected Patients: Visit 1 vs Visit 5",
        y = "Visit 5 Normalized Value",
        x = "Visit 1 Normalized Value",
        color = "Top 5 Points with largest mean\nchange from visit 1 to visit 5",
-       subtitle = "Taq + Culture used to determine EAEC presence") +
+       subtitle = "Culture only used to determine EAEC presence") +
   theme_minimal() +
   theme(
     plot.title = element_text(size = 14, face = "bold"),
@@ -78,7 +79,7 @@ PanEC_IgG_plot <- ggplot(data = one_v_five, aes(x = `1`, y = `5`)) +
     legend.title = element_text(size = 12)
   )
 
-PanEC_IgG_plot
+PanEC_IgA_plot
 
 ## Save Plots -----------------------------------------------------------
-ggsave(plot = PanEC_IgG_plot, "results/figures/EAEC_linear_PanEC_IgG_v15.png", width = 14, height = 8)
+ggsave(plot = PanEC_IgA_plot, "results/figures/EAEC_linear_PanEC_IgA_v15_culture.png", width = 14, height = 8)

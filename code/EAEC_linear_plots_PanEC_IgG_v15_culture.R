@@ -1,9 +1,10 @@
 #####################################################
-# Name: EAEC_linear_plot_PanEC_IgG_v15.R
+# Name: EAEC_linear_plot_PanEC_IgG_v15_culture.R
 # Author: Ryan Johnson
 # Date Created: 9 September 2018
 # Purpose: Visulize the normalized spot signals from
-#  acute to convalescent using the PanEC_IgG data
+#  acute to convalescent using the PanEC_IgG data. 
+#  EAEC presence determined by culture only.
 #####################################################
 
 ## Libraries -----------------------------------------------------
@@ -21,8 +22,8 @@ PanEC_IgG <- read_csv("data/processed/PanEC_IgG_IVTT_RawData_tidy.csv")
 PanEC_IgG_spread <- PanEC_IgG %>%
   
   # Select for ONLY EAEC infected patients
-  filter(EAEC_both == "yes") %>%
-
+  filter(EAEC_culture == "yes") %>%
+  
   # Extract columns of interest
   select(ID, Description, Patients, visit, norm_value) %>%
   
@@ -66,7 +67,7 @@ PanEC_IgG_plot <- ggplot(data = one_v_five, aes(x = `1`, y = `5`)) +
        y = "Visit 5 Normalized Value",
        x = "Visit 1 Normalized Value",
        color = "Top 5 Points with largest mean\nchange from visit 1 to visit 5",
-       subtitle = "Taq + Culture used to determine EAEC presence") +
+       subtitle = "Culture only used to determine EAEC presence") +
   theme_minimal() +
   theme(
     plot.title = element_text(size = 14, face = "bold"),
@@ -81,4 +82,4 @@ PanEC_IgG_plot <- ggplot(data = one_v_five, aes(x = `1`, y = `5`)) +
 PanEC_IgG_plot
 
 ## Save Plots -----------------------------------------------------------
-ggsave(plot = PanEC_IgG_plot, "results/figures/EAEC_linear_PanEC_IgG_v15.png", width = 14, height = 8)
+ggsave(plot = PanEC_IgG_plot, "results/figures/EAEC_linear_PanEC_IgG_v15_culture.png", width = 14, height = 8)
