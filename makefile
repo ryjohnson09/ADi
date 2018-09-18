@@ -16,11 +16,11 @@ list:
 
 
 # Create Clinical Metadata Table Extracted from TrEAT DB
-# Depends on:	data/raw/TrEAT_Merge_2018.06.27.XLSX
+# Depends on:	data/raw/TrEAT_Merge_ESBL_2018.09.13_v2.XLSX
 #               data/raw/TrEAT_Merge_DataDictionary_2018.06.27.XLSX
 #               code/Create_Clin_Metadata.R
 # Produces:     data/processed/TrEAT_Clinical_Metadata_tidy.csv
-data/processed/TrEAT_Clinical_Metadata_tidy.csv : data/raw/TrEAT_Merge_2018.06.27.XLSX\
+data/processed/TrEAT_Clinical_Metadata_tidy.csv : data/raw/TrEAT_Merge_ESBL_2018.09.13_v2.XLSX\
                                                   data/raw/TrEAT_Merge_DataDictionary_2018.06.27.XLSX\
                                                   code/Create_Clin_Metadata.R
 	R -e "source('code/Create_Clin_Metadata.R', echo=T)"

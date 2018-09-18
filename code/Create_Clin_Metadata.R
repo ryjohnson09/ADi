@@ -13,7 +13,7 @@ library(readxl)
 ## Read in TrEAT and Clean ----------------------------------------------
 
 # Read in TrEAT DB
-treat <- read_excel("data/raw/TrEAT_Merge_2018.06.27.XLSX")
+treat <- read_excel("data/raw/TrEAT_Merge_ESBL_2018.09.13_v2.XLSX")
 
 # Import data that explains treat column names
 treat_explain <- read_excel("data/raw/TrEAT_Merge_DataDictionary_2018.06.27.XLSX")
@@ -29,14 +29,18 @@ treat_explain <- treat_explain %>%
 foo <- tibble(STUDY_ID_TRUNC = colnames(treat[-1])) %>% 
   full_join(., treat_explain, by = "STUDY_ID_TRUNC")
 
-# Check if labels match
-ifelse(nrow(foo) == ncol(treat[,-1]), "Clear", stop("labels don't match"))
+# Ensure that there are no name conflicts
+if (anyNA(foo$`Truncated Study ID`)){
+  foo <- foo %>%
+    mutate(`Truncated Study ID` = ifelse(is.na(`Truncated Study ID`), STUDY_ID_TRUNC, `Truncated Study ID`))
+}
 
 # Assign explanations to columns
 colnames(treat) <- c("STUDY_ID", foo$`Truncated Study ID`)
 
 # Clean
 rm(treat_explain, foo)
+
 
 
 
@@ -127,7 +131,11 @@ treat_clin <- treat %>%
          Gross_blood_in_stool,
          
          # Occult blood test
-         Occult_blood_result)
+         Occult_blood_result,
+         
+         # ESBL columns
+         ESBL_V1,
+         ESBL_V5)
 
 
 # Recode to make more legible
@@ -183,14 +191,20 @@ treat_clin <- treat_clin %>%
   mutate(Occult_blood_result =
            ifelse(Occult_blood_result == "N/A", NA, Occult_blood_result)) %>%
   
+  mutate(ESBL_V1 = 
+           ifelse(ESBL_V1 == "N/A" | ESBL_V1 == "NS", NA, ESBL_V1)) %>%
+  
+  mutate(ESBL_V5 = 
+           ifelse(ESBL_V5 == "N/A" | ESBL_V5 == "NS", NA, ESBL_V5)) %>%
+  
   
   #############################
 ### Add in custom columns ###
 #############################
 mutate(LLS_severity = 
-         ifelse(Number_of_loose_liquid_stools_in_last_8_hours_prior_to_presentation <= 1, "mild",
-                ifelse(Number_of_loose_liquid_stools_in_last_8_hours_prior_to_presentation %in% c(2,3,4), "moderate",
-                       ifelse(Number_of_loose_liquid_stools_in_last_8_hours_prior_to_presentation >= 5, "severe", NA))))
+        ifelse(Number_of_loose_liquid_stools_in_last_8_hours_prior_to_presentation <= 1, "mild",
+        ifelse(Number_of_loose_liquid_stools_in_last_8_hours_prior_to_presentation %in% c(2,3,4), "moderate",
+        ifelse(Number_of_loose_liquid_stools_in_last_8_hours_prior_to_presentation >= 5, "severe", NA))))
 
 
 ##########################
