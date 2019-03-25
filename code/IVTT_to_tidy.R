@@ -3,12 +3,11 @@
 # Purpose: Convert raw IVTT ADi data to 
 #          normalized tidy format
 # Created: 27 June 2018
-# Usage:
-#     IVTT_to_tidy("ETEC_IgG_IVTT.csv")
 ################################################
 
 library(tidyverse)
 
+## Function to process IVTT data -------------------------------------
 IVTT_to_tidy <- function(IVTT_raw_data){
   
   # Make sure data is in csv format
@@ -16,11 +15,11 @@ IVTT_to_tidy <- function(IVTT_raw_data){
          IVTT_raw_data, stop("Data not CSV format"))
   
   
-  ## Read in the csv ############################
+  # Read in the csv
   IVTT <- read_csv(IVTT_raw_data)
   
   
-  # Make data tidy (i.e. long) ##################
+  # Make data tidy (i.e. long)
   IVTT <- IVTT %>%
     gather(key = Patients, value = value, -ID, -Spot.Type, -Description) %>%
     
@@ -39,7 +38,7 @@ IVTT_to_tidy <- function(IVTT_raw_data){
     mutate(Patients = gsub("\\.v\\d$", "", Patients))
   
   
-  # Normalize the signal intensity ##########################
+  # Normalize the signal intensity 
   # Get sample medians for negative controls
   sample_neg_ctrl_medians <- IVTT %>%
     filter(ID == "Negative control") %>%
@@ -59,21 +58,19 @@ IVTT_to_tidy <- function(IVTT_raw_data){
     filter(ID != "Negative control")
   
   
-  # Set norm_values less than -2 to -2 ----------------------------------------
+  # Set norm_values less than -2 to -2
   IVTT <- IVTT %>%
     mutate(norm_value = ifelse(norm_value <= -2, -2, norm_value))
-  
-  
-  # Merge in Clinical Metadata
-  clin_data <- read_csv("data/processed/TrEAT_Clinical_Metadata_tidy.csv")
-  
-  IVTT <- IVTT %>%
-    right_join(., clin_data, by = c("Patients" = "STUDY_ID"))
-  
-  
-  # Write tidy normalized IVTT data to processed directory --------------------
-  # Create new name for IVTT normalized tidy data
-  tidy_IVTT_name <- sub('\\.csv$', '', basename(IVTT_raw_data))
-    
-  write_csv(IVTT, paste0("data/processed/", tidy_IVTT_name, "_tidy.csv"))
 }
+
+## Run function on each IVTT data set ---------------------------------------------------------
+ETEC_IgA <- IVTT_to_tidy("data/raw/Dataset_ETEC_IgA_IVTT.AG/Data/ETEC_IgA_IVTT_RawData.csv")
+ETEC_IgG <- IVTT_to_tidy("data/raw/Dataset_ETEC_IgG_IVTT.AG/Data/ETEC_IgG_IVTT_RawData.csv")
+PanEC_IgA <- IVTT_to_tidy("data/raw/Dataset_PanEC_IgA_IVTT.AG/Data/PanEC_IgA_IVTT_RawData.csv")
+PanEC_IgG <- IVTT_to_tidy("data/raw/Dataset_PanEC_IgG_IVTT.AG/Data/PanEC_IgG_IVTT_RawData.csv")
+
+## Write to data/processed -----------------------------------------------
+write_csv(x = ETEC_IgA, path = "data/processed/ETEC_IgA_IVTT_tidy.csv")
+write_csv(x = ETEC_IgG, path = "data/processed/ETEC_IgG_IVTT_tidy.csv")
+write_csv(x = PanEC_IgA, path = "data/processed/PanEC_IgA_IVTT_tidy.csv")
+write_csv(x = PanEC_IgG, path = "data/processed/PanEC_IgG_IVTT_tidy.csv")

@@ -28,3 +28,36 @@ data/processed/TrEAT_Clinical_Metadata_tidy.csv : data/raw/Dataset_ETEC_IgA_IVTT
 						  data/processed/Taq_tidy.csv\
                                                   code/Create_Clin_Metadata.R
 	R -e "source('code/Create_Clin_Metadata.R', echo=T)"
+
+
+# Analyze and process PURIFIED.PROTEIN data sets
+# Depends on:	data/raw/Dataset_IgA_PURIFIED.PROTEIN/Data/IgA_PurifiedProtein_RawData.csv
+#		data/raw/Dataset_IgG_PURIFIED.PROTEIN/Data/IgG_PurifiedProtein_RawData.csv
+#		code/PURIFIED.PROTEIN_to_tidy.R
+# Produces:	data/processed/IgG_PurifiedProtein_RawData_tidy.csv
+#		data/processed/IgA_PurifiedProtein_RawData_tidy.csv
+data/processed/IgG_PurifiedProtein_RawData_tidy.csv\
+data/processed/IgA_PurifiedProtein_RawData_tidy.csv : data/raw/Dataset_IgG_PURIFIED.PROTEIN/Data/IgG_PurifiedProtein_RawData.csv\
+						      data/raw/Dataset_IgA_PURIFIED.PROTEIN/Data/IgA_PurifiedProtein_RawData.csv\
+						      code/PURIFIED.PROTEIN_to_tidy.R
+	R -e "source('code/PURIFIED.PROTEIN_to_tidy.R', echo=T)"
+
+# Analyze and process IVTT data sets
+# Depends on:	data/raw/Dataset_ETEC_IgA_IVTT.AG/Data/ETEC_IgA_IVTT_RawData.csv
+#		data/raw/Dataset_ETEC_IgG_IVTT.AG/Data/ETEC_IgG_IVTT_RawData.csv
+#		data/raw/Dataset_PanEC_IgA_IVTT.AG/Data/PanEC_IgA_IVTT_RawData.csv
+#		data/raw/Dataset_PanEC_IgG_IVTT.AG/Data/PanEC_IgG_IVTT_RawData.csv
+#		code/IVTT_to_tidy.R
+# Produces:	data/processed/ETEC_IgA_IVTT_tidy.csv
+#		data/processed/ETEC_IgG_IVTT_tidy.csv
+#		data/processed/PanEC_IgA_IVTT_tidy.csv
+#		data/processed/PanEC_IgG_IVTT_tidy.csv
+data/processed/ETEC_IgA_IVTT_tidy.csv\
+data/processed/ETEC_IgG_IVTT_tidy.csv\
+data/processed/PanEC_IgA_IVTT_tidy.csv\
+data/processed/PanEC_IgG_IVTT_tidy.csv : data/raw/Dataset_ETEC_IgA_IVTT.AG/Data/ETEC_IgA_IVTT_RawData.csv\
+			                 data/raw/Dataset_ETEC_IgG_IVTT.AG/Data/ETEC_IgG_IVTT_RawData.csv\
+			                 data/raw/Dataset_PanEC_IgA_IVTT.AG/Data/PanEC_IgA_IVTT_RawData.csv\
+			                 data/raw/Dataset_PanEC_IgG_IVTT.AG/Data/PanEC_IgG_IVTT_RawData.csv\
+			                 code/IVTT_to_tidy.R
+	R -e "source('code/IVTT_to_tidy.R', echo=T)"
