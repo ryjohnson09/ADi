@@ -17,9 +17,11 @@ docs/
 
 # R Related #
 ############
-.Rproj.user/
+.Rproj.user
+ADi.Rproj
 
 # Shiny #
 ###############
 shiny/*/*
 !shiny/*/app.R
+
