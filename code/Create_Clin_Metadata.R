@@ -199,12 +199,16 @@ treat_clin <- treat_clin %>%
   
   
   #############################
-### Add in custom columns ###
-#############################
-mutate(LLS_severity = 
-        ifelse(Number_of_loose_liquid_stools_in_last_8_hours_prior_to_presentation <= 1, "mild",
-        ifelse(Number_of_loose_liquid_stools_in_last_8_hours_prior_to_presentation %in% c(2,3,4), "moderate",
-        ifelse(Number_of_loose_liquid_stools_in_last_8_hours_prior_to_presentation >= 5, "severe", NA))))
+  ### Add in custom columns ###
+  #############################
+  mutate(LLS_severity = 
+           ifelse(Number_of_loose_liquid_stools_in_last_8_hours_prior_to_presentation <= 1, "mild",
+           ifelse(Number_of_loose_liquid_stools_in_last_8_hours_prior_to_presentation %in% c(2,3,4), "moderate",
+           ifelse(Number_of_loose_liquid_stools_in_last_8_hours_prior_to_presentation >= 5, "severe", NA)))) %>% 
+    
+    mutate(ESBL_either =
+           ifelse(ESBL_V1 == "Positive" | ESBL_V5 == "Positive", "Positive",
+           ifelse(ESBL_V1 == "Negative" & ESBL_V5 == "Negative", "Negative", NA)))
 
 
 ##########################
@@ -339,12 +343,14 @@ treat_path <- treat %>%
          Giardia_result_from_taq_stool_card_sample
   )
 
-# Convert all columns to numeric (will coerce 'undetermined' to NA)
-treat_path <- treat_path %>%
+treat_path_foo <- treat_path %>%
+  # Change 'Undertermined' to max threshold (40)
+  mutate_at(vars(-STUDY_ID, -ends_with("_routine_microbiology")), funs(ifelse(. == "Undetermined", "40", .))) %>%
+  # Convert all columns to numeric (will coerce 'Indeterminate' and '.' to NA)
   mutate_at(vars(-STUDY_ID, -ends_with("_routine_microbiology")), as.numeric) %>%
-  # Convert all values under 30 to 1 and over 35 to NA
+  # Convert all values under 35 to 1 and over 35 to NA
   mutate_at(vars(-STUDY_ID, -ends_with("_routine_microbiology")), funs(
-    ifelse(. < 30, 1, 0)))
+    ifelse(. < 35, 1, 0)))
 
 
 
@@ -354,18 +360,18 @@ treat_path <- treat_path %>%
   #EAEC
   mutate(EAEC_culture = ifelse(
     `E._coli-like_isolate_1_is_EAEC_routine_microbiology` %in% c("Yes", "yes", "1") |
-      `E._coli-like_isolate_2_is_EAEC_routine_microbiology` %in% c("Yes", "yes", "1") |
-      `E._coli-like_isolate_3_is_EAEC_routine_microbiology` %in% c("Yes", "yes", "1") |
-      `E._coli-like_isolate_4_is_EAEC_routine_microbiology` %in% c("Yes", "yes", "1") |
-      `E._coli-like_isolate_5_is_EAEC_routine_microbiology` %in% c("Yes", "yes", "1"), "yes", "no")) %>% 
+    `E._coli-like_isolate_2_is_EAEC_routine_microbiology` %in% c("Yes", "yes", "1") |
+    `E._coli-like_isolate_3_is_EAEC_routine_microbiology` %in% c("Yes", "yes", "1") |
+    `E._coli-like_isolate_4_is_EAEC_routine_microbiology` %in% c("Yes", "yes", "1") |
+    `E._coli-like_isolate_5_is_EAEC_routine_microbiology` %in% c("Yes", "yes", "1"), "yes", "no")) %>% 
   
   mutate(EAEC_taq = ifelse( 
     EAEC_aaiC_result_from_taq_stool_sample == 1 | 
-      EAEC_aaiC_result_from_taq_stool_card_sample == 1 |
-      EAEC_aatA_result_from_taq_stool_sample == 1 |
-      EAEC_aatA_result_from_taq_stool_card_sample == 1 |
-      EAEC_aggR_result_from_taq_stool_sample == 1 | 
-      EAEC_aggR_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
+    EAEC_aaiC_result_from_taq_stool_card_sample == 1 |
+    EAEC_aatA_result_from_taq_stool_sample == 1 |
+    EAEC_aatA_result_from_taq_stool_card_sample == 1 |
+    EAEC_aggR_result_from_taq_stool_sample == 1 | 
+    EAEC_aggR_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
   
   mutate(EAEC_either = ifelse(
     EAEC_culture == "yes" | EAEC_taq == "yes", "yes", "no")) %>%
@@ -377,18 +383,18 @@ treat_path <- treat_path %>%
   # ETEC
   mutate(ETEC_culture = ifelse(
     `E._coli-like_isolate_1_is_ETEC_routine_microbiology` %in% c("Yes", "yes", "1") |
-      `E._coli-like_isolate_2_is_ETEC_routine_microbiology` %in% c("Yes", "yes", "1") |
-      `E._coli-like_isolate_3_is_ETEC_routine_microbiology` %in% c("Yes", "yes", "1") |
-      `E._coli-like_isolate_4_is_ETEC_routine_microbiology` %in% c("Yes", "yes", "1") |
-      `E._coli-like_isolate_5_is_ETEC_routine_microbiology` %in% c("Yes", "yes", "1"), "yes", "no")) %>%
+    `E._coli-like_isolate_2_is_ETEC_routine_microbiology` %in% c("Yes", "yes", "1") |
+    `E._coli-like_isolate_3_is_ETEC_routine_microbiology` %in% c("Yes", "yes", "1") |
+    `E._coli-like_isolate_4_is_ETEC_routine_microbiology` %in% c("Yes", "yes", "1") |
+    `E._coli-like_isolate_5_is_ETEC_routine_microbiology` %in% c("Yes", "yes", "1"), "yes", "no")) %>%
   
   mutate(ETEC_taq = ifelse(
     ETEC_LT_result_from_taq_stool_sample == 1 | 
-      ETEC_LT_result_from_taq_stool_card_sample == 1 |
-      ETEC_STh_result_from_taq_stool_sample == 1 | 
-      ETEC_STh_result_from_taq_stool_card_sample == 1 |
-      ETEC_STp_result_from_taq_stool_sample == 1 | 
-      ETEC_STp_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
+    ETEC_LT_result_from_taq_stool_card_sample == 1 |
+    ETEC_STh_result_from_taq_stool_sample == 1 | 
+    ETEC_STh_result_from_taq_stool_card_sample == 1 |
+    ETEC_STp_result_from_taq_stool_sample == 1 | 
+    ETEC_STp_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
   
   mutate(ETEC_either = ifelse(
     ETEC_culture == "yes" | ETEC_taq == "yes", "yes", "no")) %>%
@@ -400,14 +406,14 @@ treat_path <- treat_path %>%
   # EPEC
   mutate(EPEC_culture = ifelse(
     `E._coli-like_isolate_1_is_EPEC_routine_microbiology` %in% c("Yes", "yes", "1") |
-      `E._coli-like_isolate_2_is_EPEC_routine_microbiology` %in% c("Yes", "yes", "1") |
-      `E._coli-like_isolate_3_is_EPEC_routine_microbiology` %in% c("Yes", "yes", "1") |
-      `E._coli-like_isolate_4_is_EPEC_routine_microbiology` %in% c("Yes", "yes", "1") |
-      `E._coli-like_isolate_5_is_EPEC_routine_microbiology` %in% c("Yes", "yes", "1"), "yes", "no")) %>%
+    `E._coli-like_isolate_2_is_EPEC_routine_microbiology` %in% c("Yes", "yes", "1") |
+    `E._coli-like_isolate_3_is_EPEC_routine_microbiology` %in% c("Yes", "yes", "1") |
+    `E._coli-like_isolate_4_is_EPEC_routine_microbiology` %in% c("Yes", "yes", "1") |
+    `E._coli-like_isolate_5_is_EPEC_routine_microbiology` %in% c("Yes", "yes", "1"), "yes", "no")) %>%
   
   mutate(EPEC_taq = ifelse(
     EPEC_eae_result_from_taq_stool_sample == 1 |
-      EPEC_eae_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
+    EPEC_eae_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
   
   mutate(EPEC_either = ifelse(
     EPEC_culture == "yes" | EPEC_taq == "yes", "yes", "no")) %>%
@@ -419,10 +425,10 @@ treat_path <- treat_path %>%
   # EHEC
   mutate(EHEC_culture = ifelse(
     `E._coli-like_isolate_1_is_EHEC_routine_microbiology` %in% c("Yes", "yes", "1") |
-      `E._coli-like_isolate_2_is_EHEC_routine_microbiology` %in% c("Yes", "yes", "1") |
-      `E._coli-like_isolate_3_is_EHEC_routine_microbiology` %in% c("Yes", "yes", "1") |
-      `E._coli-like_isolate_4_is_EHEC_routine_microbiology` %in% c("Yes", "yes", "1") |
-      `E._coli-like_isolate_5_is_EHEC_routine_microbiology` %in% c("Yes", "yes", "1"), "yes", "no")) %>%
+    `E._coli-like_isolate_2_is_EHEC_routine_microbiology` %in% c("Yes", "yes", "1") |
+    `E._coli-like_isolate_3_is_EHEC_routine_microbiology` %in% c("Yes", "yes", "1") |
+    `E._coli-like_isolate_4_is_EHEC_routine_microbiology` %in% c("Yes", "yes", "1") |
+    `E._coli-like_isolate_5_is_EHEC_routine_microbiology` %in% c("Yes", "yes", "1"), "yes", "no")) %>%
   
   mutate(EHEC_either = ifelse(
     EHEC_culture == "yes", "yes", "no")) %>%
@@ -433,10 +439,10 @@ treat_path <- treat_path %>%
   # EIEC
   mutate(EIEC_culture = ifelse(
     `E._coli-like_isolate_1_is_EIEC_routine_microbiology` %in% c("Yes", "yes", "1") |
-      `E._coli-like_isolate_2_is_EIEC_routine_microbiology` %in% c("Yes", "yes", "1") |
-      `E._coli-like_isolate_3_is_EIEC_routine_microbiology` %in% c("Yes", "yes", "1") |
-      `E._coli-like_isolate_4_is_EIEC_routine_microbiology` %in% c("Yes", "yes", "1") |
-      `E._coli-like_isolate_5_is_EIEC_routine_microbiology` %in% c("Yes", "yes", "1"), "yes", "no")) %>%
+    `E._coli-like_isolate_2_is_EIEC_routine_microbiology` %in% c("Yes", "yes", "1") |
+    `E._coli-like_isolate_3_is_EIEC_routine_microbiology` %in% c("Yes", "yes", "1") |
+    `E._coli-like_isolate_4_is_EIEC_routine_microbiology` %in% c("Yes", "yes", "1") |
+    `E._coli-like_isolate_5_is_EIEC_routine_microbiology` %in% c("Yes", "yes", "1"), "yes", "no")) %>%
   
   mutate(EIEC_either = ifelse(
     EIEC_culture == "yes", "yes", "no")) %>%
@@ -446,9 +452,9 @@ treat_path <- treat_path %>%
   # C.diff
   mutate(C_diff_taq = ifelse(
     C._difficile_tcdA_result_from_taq_stool_sample == 1 |
-      C._difficile_tcdA_result_from_taq_stool_card_sample == 1 |
-      C._difficile_tcdB_result_from_taq_stool_sample == 1 |
-      C._difficile_tcdB_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
+    C._difficile_tcdA_result_from_taq_stool_card_sample == 1 |
+    C._difficile_tcdB_result_from_taq_stool_sample == 1 |
+    C._difficile_tcdB_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
   
   mutate(C_diff_either = ifelse(
     C_diff_taq == "yes", "yes", "no")) %>%
@@ -458,9 +464,9 @@ treat_path <- treat_path %>%
   # STEC
   mutate(STEC_taq = ifelse(
     STEC_stx1_result_from_taq_stool_sample == 1 | 
-      STEC_stx1_result_from_taq_stool_card_sample == 1 | 
-      STEC_stx2_result_from_taq_stool_sample == 1 | 
-      STEC_stx2_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
+    STEC_stx1_result_from_taq_stool_card_sample == 1 | 
+    STEC_stx2_result_from_taq_stool_sample == 1 | 
+    STEC_stx2_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
   
   mutate(STEC_either = ifelse(
     STEC_taq == "yes", "yes", "no")) %>%
@@ -473,13 +479,13 @@ treat_path <- treat_path %>%
   
   mutate(Shigella_taq = ifelse(
     S._dysenteriae_I_result_from_taq_stool_sample == 1 | 
-      S._dysenteriae_I_result_from_taq_stool_card_sample == 1 | 
-      S._flexneri_6_result_from_taq_stool_sample == 1 | 
-      S._flexneri_6_result_from_taq_stool_card_sample == 1 | 
-      `S._flexneri_non-6_result_from_taq_stool_sample` == 1 | 
-      `S._flexneri_non-6_result_from_taq_stool_card_sample` == 1 | 
-      S._sonnei_result_from_taq_stool_sample == 1 | 
-      S._sonnei_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
+    S._dysenteriae_I_result_from_taq_stool_card_sample == 1 | 
+    S._flexneri_6_result_from_taq_stool_sample == 1 | 
+    S._flexneri_6_result_from_taq_stool_card_sample == 1 | 
+    `S._flexneri_non-6_result_from_taq_stool_sample` == 1 | 
+    `S._flexneri_non-6_result_from_taq_stool_card_sample` == 1 | 
+    S._sonnei_result_from_taq_stool_sample == 1 | 
+    S._sonnei_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
   
   mutate(Shigella_either = ifelse(
     Shigella_culture == "yes" | Shigella_taq == "yes", "yes", "no")) %>%
@@ -490,7 +496,7 @@ treat_path <- treat_path %>%
   # Aeromonas
   mutate(Aeromonas_taq = ifelse(
     Aremonas_result_from_taq_stool_sample == 1 |
-      Aremonas_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
+    Aremonas_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
   
   mutate(Aeromonas_either = ifelse(
     Aeromonas_taq == "yes", "yes", "no")) %>%
@@ -503,13 +509,13 @@ treat_path <- treat_path %>%
   
   mutate(Campylobacter_taq = ifelse(
     Campylobacter_result_from_taq_stool_sample == 1 |
-      Campylobacter_result_from_taq_stool_card_sample == 1 |
-      C._coli_result_from_taq_stool_sample == 1 |
-      C._coli_result_from_taq_stool_card_sample == 1 |
-      C._jejuni_result_from_taq_stool_sample == 1 |
-      C._jejuni_result_from_taq_stool_card_sample == 1 |
-      C._jejuni_coli_result_from_taq_stool_sample == 1 |
-      C._jejuni_coli_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
+    Campylobacter_result_from_taq_stool_card_sample == 1 |
+    C._coli_result_from_taq_stool_sample == 1 |
+    C._coli_result_from_taq_stool_card_sample == 1 |
+    C._jejuni_result_from_taq_stool_sample == 1 |
+    C._jejuni_result_from_taq_stool_card_sample == 1 |
+    C._jejuni_coli_result_from_taq_stool_sample == 1 |
+    C._jejuni_coli_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
   
   mutate(Campylobacter_either = ifelse(
     Campylobacter_culture == "yes" | Campylobacter_taq == "yes", "yes", "no")) %>%
@@ -521,7 +527,7 @@ treat_path <- treat_path %>%
   # EcoliO157H7
   mutate(EcoliO157H7_taq = ifelse(
     E._coli_O157_H7_result_from_taq_stool_sample == 1 |
-      E._coli_O157_H7_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
+    E._coli_O157_H7_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
   
   mutate(EcoliO157H7_either = ifelse(
     EcoliO157H7_taq == "yes", "yes", "no")) %>%
@@ -535,7 +541,7 @@ treat_path <- treat_path %>%
   
   mutate(Salmonella_taq = ifelse(
     Salmonella_result_from_taq_stool_sample == 1 |
-      Salmonella_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
+    Salmonella_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
   
   mutate(Salmonella_either = ifelse(
     Salmonella_culture == "yes" | Salmonella_taq == "yes", "yes", "no")) %>%
@@ -550,7 +556,7 @@ treat_path <- treat_path %>%
   
   mutate(Vibrio_taq = ifelse(
     V._parahaemolyticus_result_from_taq_stool_sample == 1 |
-      V._parahaemolyticus_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
+    V._parahaemolyticus_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
   
   mutate(Vibrio_either = ifelse(
     Vibrio_culture == "yes" | Vibrio_taq == "yes", "yes", "no")) %>%
@@ -561,7 +567,7 @@ treat_path <- treat_path %>%
   # Adenovirus
   mutate(Adenovirus_taq = ifelse(
     Adenovirus_result_from_taq_stool_sample == 1 |
-      Adenovirus_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
+    Adenovirus_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
   
   mutate(Adenovirus_either = ifelse(
     Adenovirus_taq == "yes", "yes", "no")) %>%
@@ -571,7 +577,7 @@ treat_path <- treat_path %>%
   # Astrovirus
   mutate(Astrovirus_taq = ifelse(
     Astrovirus_result_from_taq_stool_sample == 1 |
-      Astrovirus_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
+    Astrovirus_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
   
   mutate(Astrovirus_either = ifelse(
     Astrovirus_taq == "yes", "yes", "no")) %>%
@@ -584,7 +590,7 @@ treat_path <- treat_path %>%
   
   mutate(Rotavirus_taq = ifelse(
     Rotavirus_result_from_taq_stool_sample == 1 |
-      Rotavirus_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
+    Rotavirus_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
   
   mutate(Rotavirus_either = ifelse(
     Rotavirus_culture == "yes" | Rotavirus_taq == "yes", "yes", "no")) %>%
@@ -596,7 +602,7 @@ treat_path <- treat_path %>%
   # Sapovirus
   mutate(Sapovirus_taq = ifelse(
     Sapovirus_result_from_taq_stool_sample == 1 |
-      Sapovirus_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
+    Sapovirus_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
   
   mutate(Sapovirus_either = ifelse(
     Sapovirus_taq == "yes", "yes", "no")) %>%
@@ -606,14 +612,14 @@ treat_path <- treat_path %>%
   # Norovirus
   mutate(Norovirus_culture = ifelse(
     Norovirus_GI_routine_microbiology %in% c("Yes", "yes", "1") |
-      Norovirus_GII_routine_microbiology %in% c("Yes", "yes", "1") |
-      Norovirus_other_routine_microbiology %in% c("Yes", "yes", "1"), "yes", "no")) %>%
+    Norovirus_GII_routine_microbiology %in% c("Yes", "yes", "1") |
+    Norovirus_other_routine_microbiology %in% c("Yes", "yes", "1"), "yes", "no")) %>%
   
   mutate(Norovirus_taq = ifelse(
     Norovirus_GI_result_from_taq_stool_sample == 1 |
-      Norovirus_GI_result_from_taq_stool_card_sample == 1 |
-      Norovirus_GII_result_from_taq_stool_sample == 1 |
-      Norovirus_GII_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
+    Norovirus_GI_result_from_taq_stool_card_sample == 1 |
+    Norovirus_GII_result_from_taq_stool_sample == 1 |
+    Norovirus_GII_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
   
   mutate(Norovirus_either = ifelse(
     Norovirus_culture == "yes" | Norovirus_taq == "yes", "yes", "no")) %>%
@@ -627,7 +633,7 @@ treat_path <- treat_path %>%
   
   mutate(Cryptosporidium_taq = ifelse(
     Cryptosporidium_result_from_taq_stool_sample == 1 |
-      Cryptosporidium_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
+    Cryptosporidium_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
   
   mutate(Cryptosporidium_either = ifelse(
     Cryptosporidium_culture == "yes" | Cryptosporidium_taq == "yes", "yes", "no")) %>%
@@ -639,7 +645,7 @@ treat_path <- treat_path %>%
   # Cyclospora
   mutate(Cyclospora_taq = ifelse(
     Cyclospora_result_from_taq_stool_sample == 1 |
-      Cyclospora_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
+    Cyclospora_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
   
   mutate(Cyclospora_either = ifelse(
     Cyclospora_taq == "yes", "yes", "no")) %>%
@@ -652,7 +658,7 @@ treat_path <- treat_path %>%
   
   mutate(E_histolytica_taq = ifelse(
     E._histolytica_result_from_taq_stool_sample == 1 |
-      E._histolytica_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
+    E._histolytica_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
   
   mutate(E_histolytica_either = ifelse(
     E_histolytica_culture == "yes" | E_histolytica_taq == "yes", "yes", "no")) %>%
@@ -667,7 +673,7 @@ treat_path <- treat_path %>%
   
   mutate(Giardia_taq = ifelse(
     Giardia_result_from_taq_stool_sample == 1 |
-      Giardia_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
+    Giardia_result_from_taq_stool_card_sample == 1, "yes", "no")) %>%
   
   mutate(Giardia_either = ifelse(
     Giardia_culture == "yes" | Giardia_taq == "yes", "yes", "no")) %>%
@@ -719,11 +725,25 @@ treat_path <- treat_path %>%
 treat_full <- treat_clin %>%
   full_join(., treat_path, by = c("STUDY_ID"))
 
+## Add Country ------------------------------------------------------
+treat_full <- treat_full %>%
+  mutate(country = ifelse(str_detect(STUDY_ID, "^48"), "Kenya", 
+                   ifelse(str_detect(STUDY_ID, "^61"), "Honduras",
+                   ifelse(str_detect(STUDY_ID, "^87"), "Djibouti", "Other"))))
+
+## Add in Taq ESBL data ------------------------------------------
+taq_data <- read_csv("data/processed/Taq_tidy.csv")
+
+# filter taq for just "either" data
+taq_data <- taq_data %>%
+  select(STUDYID, contains("either"))
+treat_full <- treat_full %>%
+  left_join(., taq_data, by = c("STUDY_ID" = "STUDYID"))
 
 ## Write to processed data ---------------------------------
 write_csv(treat_full, "data/processed/TrEAT_Clinical_Metadata_tidy.csv")
 
 
 ## Clean ----------------
-rm(treat, treat_clin, treat_path)
+rm(treat, treat_clin, treat_path, taq_data)
 
