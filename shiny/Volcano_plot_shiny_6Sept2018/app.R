@@ -84,16 +84,20 @@ server <- function(input, output){
   ####################
   
   new_dataset <- reactive({
-    adi_data <- read_csv(ifelse(input$dataset == "ETEC_IgG_IVTT", "ETEC_IgG_IVTT_RawData_tidy.csv",
-             ifelse(input$dataset == "ETEC_IgA_IVTT", "ETEC_IgA_IVTT_RawData_tidy.csv",
-             ifelse(input$dataset == "PanEC_IgG_IVTT", "PanEC_IgG_IVTT_RawData_tidy.csv",
-             ifelse(input$dataset == "PanEC_IgA_IVTT", "PanEC_IgA_IVTT_RawData_tidy.csv",
+    adi_data <- read_csv(ifelse(input$dataset == "ETEC_IgG_IVTT", "ETEC_IgG_IVTT_tidy.csv",
+             ifelse(input$dataset == "ETEC_IgA_IVTT", "ETEC_IgA_IVTT_tidy.csv",
+             ifelse(input$dataset == "PanEC_IgG_IVTT", "PanEC_IgG_IVTT_tidy.csv",
+             ifelse(input$dataset == "PanEC_IgA_IVTT", "PanEC_IgA_IVTT_tidy.csv",
              ifelse(input$dataset == "Purified_Protein_ETEC_IgG", "IgG_PurifiedProtein_RawData_tidy.csv",
              ifelse(input$dataset == "Purified_Protein_ETEC_IgA", "IgA_PurifiedProtein_RawData_tidy.csv",
              stopApp("Invalid Data Set"))))))))
+    
+    # Merge Treat
+    adi_data_treat <- adi_data %>% 
+      left_join(., treat, by = c("Patients" = "STUDY_ID"))
 
     # Filter out LOP and PLA samples
-    filter(adi_data, !Treatment %in% c("LOP", "PLA"))
+    filter(adi_data_treat, !Treatment %in% c("LOP", "PLA"))
   })
   
 
