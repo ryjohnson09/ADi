@@ -70,7 +70,9 @@ ui <- fluidPage(
   mainPanel(
     plotlyOutput("plot", width = "150%", height = "100%"),
     htmlOutput("legend"),
-    htmlOutput("text"))
+    htmlOutput("text"),
+    br(),
+    fluidRow(column(12,tableOutput("my_table"))))
    
 )
 
@@ -128,9 +130,6 @@ server <- function(input, output){
   matched_dataset <- reactive({
     if(input$matched == "matched_samples" & input$visit != "Acute vs Conv"){
 
-      # Get length of visit number
-      visit_numbers <- length(unique(visit_filter()$visit))
-
       # Get counts of patient IDs with visit number
       patient_visit_counts <- visit_filter() %>%
         select(Patients, visit) %>%
@@ -139,7 +138,7 @@ server <- function(input, output){
         summarise(n =n()) %>%
 
         # Then filter patients that have that number
-        filter(n == visit_numbers) %>%
+        filter(n == 2) %>%
         pull(Patients)
 
       # Filter the visit_filter dataset to only
@@ -164,9 +163,9 @@ server <- function(input, output){
       selectInput("pathogens", "Pathogens", choices = taq_choices)
     } else if (input$path_detection == "Either"){
       selectInput("pathogens", "Pathogens", choices = either_choices)
-    } else {
+    } else if (input$path_detection == "Both"){
       selectInput("pathogens", "Pathogens", choices = both_choices)
-    }
+    } else {stopApp("Invalied Pathogen Selection")}
   })
 
 
@@ -266,7 +265,8 @@ server <- function(input, output){
     HTML(paste(str1, str2, sep = "<br/>"))
   })
   
-  
+  ## Show Table ----------------------------------------------------
+  #output$my_table <- renderTable({stats_dataset()})
 
  }
 
