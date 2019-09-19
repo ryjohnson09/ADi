@@ -23,31 +23,34 @@ colnames(olink_raw_data) <- c("subject_ID", olink[3, 4:95]) # rename columns
 
 # Make tidy
 olink_tidy <- olink_raw_data %>%
+  # Remove Control samples
   filter(!str_detect(subject_ID, "^C")) %>%
+  #Make long
   gather(protein, olink_value, -subject_ID)
 
-rm(olink_raw_data)
 
 # Add in Limit of detection
-LOD <- as.tibble(t(olink[c(3, 335), 4:95]))
+LOD <- as_tibble(t(olink[c(3, 335), 4:95]))
 LOD <- LOD %>%
   rename(protein = V1, LOD_value = V2)
 
 olink_tidy <- olink_tidy %>%
   full_join(., LOD, by = "protein")
 
-rm(LOD)
 
 # Remove samples with "warning" in QC
-qc_data <- olink %>% 
-  select(X__2, X__95) %>%
-  filter(!is.na(X__2) & X__2 != "Serum ID") %>%
-  rename(subject_ID = X__2, qc = X__95)
+qc_data <- olink[, c(2, ncol(olink))]
+colnames(qc_data) <- c("subject_ID", "qc")
+qc_data <- qc_data %>% 
+  filter(!is.na(subject_ID)) %>% 
+  filter(subject_ID != "Serum ID")
 
+# Extract bad samples
 bad_samples <- qc_data %>%
   filter(qc == "Warning") %>%
   pull(subject_ID)
 
+# Remove bad samples from tidy data
 olink_tidy <- olink_tidy %>%
   filter(!subject_ID %in% bad_samples)
 
