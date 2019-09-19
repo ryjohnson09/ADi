@@ -5,16 +5,6 @@ list:
 
 
 
-# Process TaqMan data for visit 1 and visit 5
-# Depends on:	data/raw/Taqman_results.xlsx
-#		code/process_taq_adi.R
-# Produces:	data/processed/Taq_tidy.csv
-data/processed/Taq_tidy.csv : data/raw/Taqman_results.xlsx\
-			      code/process_taq_adi.R
-	R -e "source('code/process_taq_adi.R', echo=T)"
-
-
-
 # Create Clinical Metadata Table Extracted from TrEAT DB
 # Depends on:   data/raw/TrEAT_Merge_ESBL_2018.09.13_v2.XLSX
 #               data/raw/TrEAT_Merge_DataDictionary_2018.06.27.XLSX
@@ -70,3 +60,12 @@ data/processed/PanEC_IgG_IVTT_tidy.csv : data/raw/Dataset_ETEC_IgA_IVTT.AG/Data/
 data/processed/Olink_tidy.csv : data/raw/20170276_Henry_M_Jackson_Foundation-Ventura_NPX_LOD_Updated_and_Revised_2.26.18.xlsx\
                                 code/Process_Raw_Olink.R
 	R -e "source('code/Process_Raw_Olink.R', echo=T)"
+
+
+# Process TaqMan data for visit 1 and visit 5
+# Depends on:	data/raw/Taqman_results.xlsx
+#		code/process_taq_adi_olink.R
+# Produces:	data/processed/Taq_tidy.csv
+data/processed/Taq_tidy.csv : data/raw/Taqman_results.xlsx\
+			      code/process_taq_adi_olink.R
+	R -e "source('code/process_taq_adi_olink.R', echo=T)"
