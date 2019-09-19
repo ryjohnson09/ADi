@@ -1,4 +1,4 @@
-# Name: process_taq_adi.R
+# Name: process_taq_adi_olink.R
 # Author: Ryan Johnson
 # Date Created: 25 March 2019
 # Purpose: Process the raw visit 1 and visit 5 taq data
@@ -72,8 +72,8 @@ taq_data_adi <- taq_data_adi %>%
   # Spread
   spread(key = Target, value = taq_value) %>%
   # For all NA's that are added, change to "Not Available"
-  mutate_at(vars(ends_with("Card")), funs(ifelse(is.na(.), "Not Available", .))) %>%
-  mutate_at(vars(ends_with("Stool")), funs(ifelse(is.na(.), "Not Available", .)))
+  mutate_at(vars(ends_with("Card")), list(~ifelse(is.na(.), "Not Available", .))) %>%
+  mutate_at(vars(ends_with("Stool")), list(~ifelse(is.na(.), "Not Available", .)))
 
 
 # Add Either column if detected by either stool or card

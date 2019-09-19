@@ -7,21 +7,18 @@
 .Trashes
 ehthumbs.db
 Thumbs.db
-
 # Data/results directories #
 ####################
 data/
 exploratory/
 results/
 docs/
-
+code/archived/
 # R Related #
 ############
 .Rproj.user
 ADi.Rproj
-
 # Shiny #
 ###############
 shiny/*/*
 !shiny/*/app.R
-
