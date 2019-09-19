@@ -61,3 +61,12 @@ data/processed/PanEC_IgG_IVTT_tidy.csv : data/raw/Dataset_ETEC_IgA_IVTT.AG/Data/
 			                 data/raw/Dataset_PanEC_IgG_IVTT.AG/Data/PanEC_IgG_IVTT_RawData.csv\
 			                 code/IVTT_to_tidy.R
 	R -e "source('code/IVTT_to_tidy.R', echo=T)"
+
+
+# Convert raw Olink data to tidy format
+# Depends on:   data/raw/20170276_Henry_M_Jackson_Foundation-Ventura_NPX_LOD_Updated_and_Revised_2.26.18.xlsx
+#               code/Process_Raw_Olink.R
+# Produces:     data/processed/Olink_tidy.csv
+data/processed/Olink_tidy.csv : data/raw/20170276_Henry_M_Jackson_Foundation-Ventura_NPX_LOD_Updated_and_Revised_2.26.18.xlsx\
+                                code/Process_Raw_Olink.R
+	R -e "source('code/Process_Raw_Olink.R', echo=T)"
